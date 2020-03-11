@@ -1,0 +1,8 @@
+Ampere colors:
+Orange - R:255, G:82, B:0
+Purple - R:88, G:11, B:57
+
+Text:
+Title - R:95, G:95, B:95
+First level - R:255, G:82, B:0
+Second level - R:88, G:10, B:57

@@ -1,0 +1,43 @@
+\mode<presentation>
+
+\tikzset{xcolor/.code args={#1=#2}{
+  \definecolor{mytemp}{RGB}{#2}
+  \tikzset{#1=mytemp}
+}}
+
+\setbeamertemplate{background}{
+  \begin{tikzpicture}
+  \useasboundingbox (0,0) rectangle(\the\paperwidth,\the\paperheight);
+  \ifnum\thepage>1\relax%
+   \fill[white,opacity=1] (0,0) rectangle(\the\paperwidth,\the\paperheight);
+   \fi
+  \end{tikzpicture}
+}
+
+% Title page
+\defbeamertemplate*{title page}{ampere}[1][]
+{ 
+  \vskip1cm%
+  \begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle(\the\paperwidth,\the\paperheight);
+    \node[inner sep=0pt] (logoAmpere) at (0.3,8.7){\includegraphics[width=2.5cm]{ampere.png}};
+    \node[minimum width=5cm] at (7.5,09.4) {\LARGE \textbf{Laboratoire Ampère}};
+    \node[minimum width=5cm] at (7.5,08.9) {\large \textbf{Unité Mixte de Recherche CNRS}};
+    \node[minimum width=5cm] at (7.5,08.4) {\large \textbf{Génie Électrique, Automatique, Bio-ingénierie}};
+    \shade[xcolor={left color={255,82,0}}, xcolor={right color={88,11,57}}] (1.7,7.8) rectangle (14.8,7.9);
+    \node[minimum width=14cm] at (7,7) {\LARGE \inserttitle};
+    \node[minimum width=14cm] at (7,6.3) {\LARGE \insertsubtitle};
+    \node[minimum width=14cm] at (7,5.0) {\large \insertauthor};
+    % \node[minimum width=14cm] at (7,4.0) {\normalsize Advisors: Xuefang Lin-Shi, Minh Tu Pham, Diego Patino.};
+    \node[minimum width=14cm] at (7,3) {\normalsize 02/12/2019};
+    \node[inner sep=0pt] (logoULyon) at (0.0,1.5){\includegraphics[height=0.7cm]{ulyon.png}};
+    \node[inner sep=0pt] (logoCNRS)  at (1.3,1.5){\includegraphics[height=0.8cm]{cnrs.png}};
+    \node[inner sep=0pt] (logoLyon1) at (2.3,1.5){\includegraphics[height=0.7cm]{lyon1.png}};
+    \node[inner sep=0pt] (logoInsa)  at (3.8,1.5){\includegraphics[height=0.7cm]{insa.png}};
+    \node[inner sep=0pt] (logoUcbl)  at (5.5,1.5){\includegraphics[height=0.8cm]{ucbl.png}};
+    \shade[xcolor={left color={255,82,0}}, xcolor={right color={88,11,57}}] (6.5,1.1) rectangle (14.8,1.6);
+  \end{tikzpicture}
+}
+
+\mode
+<all>
