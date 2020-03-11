@@ -259,7 +259,7 @@ Diseñe un controlador tal que el sistema tenga
 	\item Valor óptimo de los parámetros $\rightarrow$ depende del índice de desempeño.
 	\item Para la función de transferencia de lazo cerrado de la forma general:
 	\begin{equation*}
-		T(s) = \frac{Y(s)}{R(s)} = \frac{b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b0}
+		T(s) = \frac{Y(s)}{R(s)} = \frac{b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b_0}
 	\end{equation*}
 	se han determinado los coeficientes óptimos que minimizan el ITAE para una entrada paso.
 	\item Ésta función de transferencia tiene $e_{ss} = 0$ para entrada paso.
@@ -269,7 +269,7 @@ Diseñe un controlador tal que el sistema tenga
 \begin{frame}[<+->]\frametitle{Coeficientes Óptimos Basados en el Criterio ITAE para una Entrada Paso}
 \centering
 \begin{equation*}
-	T(s) = \frac{Y(s)}{R(s)} = \frac{b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b0}
+	T(s) = \frac{Y(s)}{R(s)} = \frac{b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b_0}
 \end{equation*}
 \vspace*{10mm}
 \includegraphics[width=10cm]{images/optimCoeffsITAEstep.eps}
@@ -278,7 +278,7 @@ Diseñe un controlador tal que el sistema tenga
 \begin{frame}[<+->]\frametitle{Coeficientes Óptimos Basados en el Criterio ITAE para una Entrada Rampa}
 \centering
 \begin{equation*}
-	T(s) = \frac{Y(s)}{R(s)} = \frac{b_1s + b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b0}
+	T(s) = \frac{Y(s)}{R(s)} = \frac{b_1s + b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b_0}
 \end{equation*}
 \vspace*{10mm}
 \includegraphics[width=8cm]{images/optimCoeffsITAEramp.eps} 
@@ -311,7 +311,7 @@ Encuentre un sistema de cero error de posición que minimice el criterio ITAE. T
 \vspace*{3mm}
 La función de transferencia óptima a partir de la tabla se selecciona como:
 \begin{equation*}
-	\frac{Y(s)}{R(s)} = G_0 = \frac{\omega_n}{s^2 + 1.4 \omega_n s + \omega_n^2}
+	\frac{Y(s)}{R(s)} = G_0 = \frac{\omega_n^2}{s^2 + 1.4 \omega_n s + \omega_n^2}
 \end{equation*}
 Note que aumentando $\omega_n$, aumentan la velocidad de respuesta y la señal de control. Se debe seleccionar $\omega_n$ tal que $|u(t)| \leq 3$.
 \end{frame}
