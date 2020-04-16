@@ -1,0 +1,72 @@
+
+\documentclass[11pt, spanish]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+% \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc}
+\usepackage{geometry}
+\geometry{
+	left=15mm,
+	right=15mm,
+	top=20mm,
+	bottom=20mm,
+}
+
+\title{Controles - Taller Clase 6}
+\author{Pontificia Universidad Javeriana, Bogotá\\Profesor: Ing. Gerardo Becerra, Ph.D.}
+\date{Marzo 18 de 2020}
+
+\begin{document}
+	\maketitle
+
+\begin{enumerate}
+
+	\item Considere la función de transferencia de lazo abierto
+	\begin{equation*}
+		KG(s) = \frac{K}{s(s+2)(s^2+4s+5)}
+	\end{equation*}
+	\begin{itemize}
+		\item Realice un bosquejo del lugar de las raíces. Verifique el resultado usando \texttt{rlocus}.
+		\item Calcule la ubicación de los polos dominantes cuando $K = 6.5$.
+		\item Para los polos dominantes encontrados, calcule el tiempo de establecimiento y el sobrepico para una entrada paso. Verifique los resultados con una simulación.
+	\end{itemize}
+
+	\item Un sistema de control tiene la siguiente función de transferencia de lazo abierto:
+		\begin{equation*}
+			KG(s) = \frac{K(s+2.5)}{(s^2+2s+2)(s^2+4s+5)}
+		\end{equation*}
+		\begin{itemize}
+			\item Realice un bosquejo del lugar de las raíces. Verifique el resultado usando \texttt{rlocus}.
+			\item Encuentre la ganancia $K$ que resulta en polos dominantes con un factor de amortiguamiento de 0.707.
+			\item Encuentre el porcentaje de sobrepico y tiempo de pico para la ganancia $K$ calculada. Verifique el resultado usando una simulación.
+		\end{itemize}
+
+	\item Un sistema de control tiene la siguiente función de transferencia de lazo abierto:
+		\begin{equation*}
+			KG(s) = \frac{K(s+1)}{s(s-1)(s+4)}
+		\end{equation*}
+		\begin{itemize}
+			\item Determine el rango de estabilidad de $K$.
+			\item Realice un bosquejo del lugar de las raíces. Verifique el resultado usando \texttt{rlocus}.
+			\item Determine el máximo valor de $\zeta$ de las raíces complejas estables.
+		\end{itemize}
+
+	\item Considere la planta caracterizada por la función de transferencia
+		\begin{equation*}
+			G(s) = \frac{(s+3)}{(s-1)(s+2)(s+5)}
+		\end{equation*}
+		Se desea diseñar un sistema de control que cumpla con las siguientes especificaciones ante una entrada paso unitaria:
+		\begin{itemize}
+			\item Porcentaje de sobrebico: 10\%.
+			\item Tiempo de establecimiento: 10 s.
+			\item Error de estado estacionario: 0.
+		\end{itemize}
+		Diseñe un controlador PID usando el lugar de las raíces por el método de aproximación de polos dominantes. Verifique el resultado usando simulaciones.
+ 	
+\end{enumerate}
+
+\end{document}
