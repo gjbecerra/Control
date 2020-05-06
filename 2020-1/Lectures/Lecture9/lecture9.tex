@@ -1,0 +1,695 @@
+\documentclass[aspectratio=169, handout]{beamer}
+% \usepackage[utf8]{inputenc}
+\usetheme{metropolis}
+\usecolortheme{orchid}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{mathtools}
+\usepackage{caption}
+% \usepackage{epstopdf}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{siunitx}
+\usepackage{cancel}
+\usepackage{textcomp}
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{tikzmark,positioning,arrows.meta,shapes.misc,calc}
+
+\setbeamerfont{footnote}{size=\tiny}
+
+% Information boxes
+\newcommand*{\info}[4][16.3]{%
+  \node [ annotation, #3, scale=0.65, text width = #1em,
+          inner sep = 2mm ] at (#2) {%
+  \list{$\bullet$}{\topsep=0pt\itemsep=0pt\parsep=0pt
+    \parskip=0pt\labelwidth=8pt\leftmargin=8pt
+    \itemindent=0pt\labelsep=2pt}%
+    #4
+  \endlist
+  };
+}
+
+%% Definitions for root locus plots
+\newcommand*{\rootlocusexample}[4]{% xmin,xmax,ymin,ymax,
+		\foreach \x in {#1,...,#2}{
+			\ifthenelse{\x=0}{}
+		  {% false case
+   			\draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {$\x$};
+		  }
+		}
+		\foreach \y in {#3,...,#4}{
+			\ifthenelse{\y=0}{}
+		  {% false case
+   			\draw (-1pt,\y cm) -- (1pt,\y cm) node[anchor=east] {$\y$};
+		  }
+   	}
+		\draw [-latex] (#1,0) -- (#2,0) node [above]  {$\sigma$};
+		\draw [-latex] (0,#3) -- (0,#4) node [right] {$j\omega$};
+}
+
+\def\centerarc[#1](#2)(#3:#4:#5)% Syntax: [draw options] (center) (initial angle:final angle:radius)
+    { \draw[#1] ($(#2)+({#5*cos(#3)},{#5*sin(#3)})$) arc (#3:#4:#5); }
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+
+\tikzset{pole/.style={cross out, draw=black, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+pole/.default={3pt}}
+\tikzset{poledes/.style={rectangle, draw=black, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+poledes/.default={3pt}}
+\tikzset{zero/.style={circle, draw=black, fill=white, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+zero/.default={3pt}}
+\tikzset{test/.style={rectangle, draw=black, fill=white, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+test/.default={3pt}}
+
+%% Definitions for block diagrams
+\tikzstyle{block} = [draw, fill=blue!20, rectangle, 
+    minimum height=2em, minimum width=3em]
+\tikzstyle{sum} = [draw, fill=blue!20, circle, node distance=1cm]
+\tikzstyle{input} = [coordinate]
+\tikzstyle{output} = [coordinate]
+\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+
+\renewcommand\textbullet{\ensuremath{\bullet}}
+\newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%% Bibliography
+\usepackage[citestyle=numeric,style=numeric,backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\addbibresource{references.bib}
+
+%%% Suppress biblatex annoying warning
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+
+%%% new theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{mylemma}{Lemma}[section]
+\newtheorem{mytheorem}{Theorem}[section]
+\newtheorem{myproposition}{Proposition}[section]
+\newtheorem{myproblem}{Problem}[section]
+\newtheorem{mydefinition}{Definition}[section]
+\newtheorem{myassumption}{Assumption}[section]
+
+\theoremstyle{remark}
+\newtheorem{myremark}{Remark}[section]
+
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
+
+\resetcounteronoverlays{saveenumi}
+
+\title{Controles}
+\subtitle{\small Clase 8: Respuesta en Frecuencia - Compensadores en Atraso, Atraso-Adelanto}
+\author{Gerardo Becerra, Ph.D.}
+\institute{Pontificia Universidad Javeriana\\ Departamento de Electrónica}
+\date{}
+ 
+\begin{document}
+
+\frame{\titlepage}	
+
+\begin{frame}[<+->]\frametitle{Compensadores - Características de los Diferentes Esquemas de Compensación}
+ 	\begin{itemize}
+ 		\item Compensación en adelanto:
+ 		\begin{itemize} 
+ 			\item Ofrece una mejora notable en la respuesta transitoria con un pequeño cambio en la exactitud de estado estacionario.
+ 			\item Puede acentuar efectos de ruido de alta frecuencia.
+ 			\item Aumenta el orden del sistema en 1 (a menos que exista cancelación polo-cero).
+ 		\end{itemize}
+ 		\item Compensación en atraso:
+ 		\begin{itemize}
+ 			\item Ofrece una mejora notable en la exactitud de estado estacionario, pero aumentando el tiempo de la respuesta transitoria.
+ 			\item Elimina los efectos de señales de ruido de alta frecuencia.
+ 			\item Aumenta el orden del sistema en 1 (a menos que exista cancelación polo-cero).
+ 		\end{itemize}
+ 		\item Compensación adelanto-atraso:
+ 		\begin{itemize}
+ 			\item Combina las características de los dos tipos de compensación.
+ 			\item Aumenta el orden del sistema en 2 (a menos que exista cancelación polo-cero).
+ 			\item El sistema se hace más complejo y es más difícil controlar la respuesta transitoria.
+ 		\end{itemize}
+  \end{itemize}    
+\end{frame}
+
+\section{Compensación en Atraso Usando la Respuesta en Frecuencia}
+\begin{frame}[<+->]\frametitle{Compensador en Atraso}
+	\begin{equation*}
+		G_c(s) = K_c \beta \frac{T s + 1}{\beta T s + 1} = K_c \frac{s+\frac{1}{T}}{s + \frac{1}{\beta T}}\hspace*{6mm} (\beta > 1)
+	\end{equation*}
+	\pause
+	\begin{itemize}
+		% \item $\beta$: Factor de atenuación del compensador.
+		\item El compensador tiene un cero en $s = -1/T$ y un polo en $s = -1/(\beta T)$.
+		\item Dado que $\beta > 1$ $\Rightarrow$ el polo se ubica a la derecha del cero.
+		% \item Para $\alpha$ muy pequeño $\Rightarrow$ el polo se localiza lejos hacia la izquierda.
+		% \item Usualmente el valor mínimo de $\alpha$ es 0.05 $\Rightarrow$ máximo adelanto de fase es cercano a \ang{65}. 
+	\end{itemize}
+\end{frame}
+
+% \begin{frame}[<+->]\frametitle{Compensador en Adelanto}
+% \vspace*{3mm}
+% \begin{columns}
+% 	\begin{column}{0.5\textwidth}
+% 		Reemplazando $s=j\omega$ y graficando $Re\left\{G(j\omega)\right\}$ vs. $Im\left\{G(j\omega)\right\}$ para $K_c=1$:
+% 		\begin{equation*}
+% 			G_c(j\omega) = K_c \alpha \frac{j\omega T + 1}{j\omega \alpha T + 1}
+% 		\end{equation*}
+% 		\begin{figure}
+% 			\centering  
+% 			\includegraphics[width=5cm]{images/lagCompensatorPolarPlot.eps}
+% 		\end{figure}
+% 	\end{column}
+% 	\begin{column}{0.5\textwidth}
+% 		\begin{itemize}
+% 			\item $\phi_m$: máximo ángulo de adelanto de fase.
+% 			\item $\omega_m$: frecuencia en el punto tangente.
+% 			\item De la figura se obtiene:
+% 			\begin{equation*}
+% 				\sin \phi_m = \frac{\frac{1-\alpha}{2}}{\frac{1+\alpha}{2}} = \frac{1-\alpha}{1+\alpha}
+% 			\end{equation*}
+% 		\end{itemize}
+% 	\end{column}
+% \end{columns}
+% \end{frame}
+ 
+\begin{frame}[<+->]\frametitle{Compensador en Atraso}
+\begin{columns}
+	\begin{column}{0.5\textwidth}
+	Diagrama de Bode del compensador para $K_c=1$, $\beta=10$.
+	\begin{itemize}
+		\item Frecuencias de quiebre: $\omega = 1/T$, $\omega = 1/(\beta T)$.
+		\item Frecuencias bajas: $|G_c(s)| = 20$ dB.
+		\item Frecuencias altas: $|G_c(s)| = 0$ dB.
+		\item Compensador en atraso $\Leftrightarrow$ Filtro pasabajos.
+		% \item Media geométrica de las frecuencias de quiebre:
+		% \begin{align*}
+		% 	\log \omega_m &=\frac{1}{2}\left( \log \frac{1}{T} + \log \frac{1}{\alpha T} \right)\\
+		% 	\omega_m &= \frac{1}{\sqrt{\alpha}T}
+		% \end{align*}
+	\end{itemize}
+	\end{column}
+	\begin{column}{0.5\textwidth}
+	\begin{figure}
+		\centering
+		\includegraphics[width=7cm]{images/bodeLagComp.eps}
+	\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Procedimiento de Diseño}
+	\begin{enumerate}
+		\item Se asume la siguiente forma para el compensador en atraso:
+		\begin{equation*}
+			G_c(s) = K_c \beta \frac{Ts+1}{\beta Ts+1} = K_c \frac{s+\frac{1}{T}}{s+\frac{1}{\beta T}}, \hspace*{3mm} (\beta > 1)
+		\end{equation*}
+		\pause
+		Definiendo $K_c \beta = K$, se tiene
+		\begin{equation*}
+			G_c(s) = K \frac{Ts+1}{\beta Ts+1}
+		\end{equation*}
+		\pause
+		La F.T. de lazo abierto del sistema compensado es:
+		\begin{equation*}
+			G_c(s)G(s) = K \frac{Ts+1}{\beta Ts+1}G(s) = \frac{Ts+1}{\beta Ts+1} KG(s) = \frac{Ts+1}{\beta Ts+1} G_1(s)
+		\end{equation*}
+		donde $G_1(s) = KG(s)$.
+		\pause
+		Determinar $K$ para satisfacer el requerimiento dado por la constante de error estático de velocidad.
+		\seti
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Procedimiento de Diseño}
+	\begin{enumerate}
+		\conti
+		\item Determine el margen de fase del sistema $G_1(s)$, y si es insuficiente continúe con los siguientes pasos.
+		\item Determine la frecuencia $\omega_c'$ donde el requerimiento de margen de fase sería satisfecho si la curva de magnitud cruzara por 0 dB en ésta frecuencia. Incluya un márgen adicional de seguridad de \ang{5}.
+		\item Ubique el cero del compensador una década por debajo de la nueva frecuencia de cruce de ganancia: $\omega_z = \omega_c'/10$.
+		\seti
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Procedimiento de Diseño}
+	\begin{enumerate}
+		\conti
+		\item Calcule la atenuación necesaria en $\omega_c'$ para asegurar que la curva de magnitud cruza por cero.
+		\item Calcule el valor de $\beta$ notando que la atenuación introducida por el compensador en $\omega_c'$ es igual a $20 \log \left(\frac{1}{\beta} \right)$
+		\item Calcule la ubicación del polo como $\omega_p = \frac{1}{\beta T} = \frac{\omega_z}{\beta}$.
+		\item Verifique si el sistema de control diseñado satisface los requerimientos. En caso contrario realizar nuevamente la ubicación del polo y cero hasta lograr un resultado satisfactorio.
+		\seti
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo}
+	Considere el sistema $G(s) = \frac{1}{s(s+1)(0.5s+1)}$ con retroalimentación unitaria:
+	\begin{figure}
+		\centering
+		\includegraphics[width=5cm]{images/lagCompensatorExampleSystem.eps}
+	\end{figure}
+	Se desea diseñar un compensador para que el sistema tenga una constante de error estático de velocidad $K_v = 5$, margen de fase de al menos \ang{40} y margen de ganancia de al menos 10 dB.
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo}
+	En primer lugar se calcula $K$ para satisfacer el requerimiento de $K_v = 5$:
+	\begin{align*}
+		K_v &= 5 = \lim_{s\rightarrow 0} sG_c(s)G(s) = \lim_{s \rightarrow 0} \cancel{s}K_c\beta\frac{Ts+1}{\beta T s + 1} \frac{1}{\cancel{s}(s+1)(0.5s+1)}\\
+		K_v &= 5 = K_c\beta\\
+		& \text{Asumiendo } K_c\beta = K \Longrightarrow K = 5
+	\end{align*}
+	\pause
+	Con $K = 5$, el sistema satisface el requerimiento de desempeño. Entonces, la función de transferencia de lazo abierto del sistema no compensado con ganancia ajustada queda:
+	\begin{equation*}
+		G_1(j\omega) = \frac{5}{j\omega(j\omega+1)(0.5j\omega+1)}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo}
+	% \vspace*{-7mm}
+  \begin{columns}
+  	\begin{column}{0.3\textwidth}
+			Usando la función \texttt{margin} de Matlab para $G_1(s)$ se obtiene:\\
+			\textcolor{red}{\small PM = -\ang{13} en 1.8 rad/s}\\
+			\textcolor{green}{\small GM = -4.44 dB en 1.41 rad/s}\\
+			Note que el sistema no compensado con ganancia ajustada en lazo cerrado es \textbf{inestable}!
+  	\end{column}
+  	\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=9cm]{images/bodeGainAdjustedSystem.eps} 	
+		  \end{figure}
+  	\end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo}
+	\vspace*{5mm}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			\small Para satisfacer el margen de fase deseado de \ang{40} se identifica la frecuencia $\omega_c'$ para la cual la fase faltante $\phi_m$ para alcanzar -\ang{180} es igual a \ang{40} más un pequeño margen de \ang{5}.\\
+			\vspace*{2mm}
+			\pause
+			Del diagrama de Bode se observa que en $\omega_c' = 0.56$ rad/s la fase es -\ang{135}, es decir $-\ang{135} - \phi_m = -\ang{180}$.\\
+			\vspace*{2mm}
+			\pause
+			$\omega_c'$ se toma como la nueva frecuencia de cruce de ganancia para el sistema compensado.
+		\end{column}		
+		\begin{column}{0.6\textwidth}
+				\centering
+				\includegraphics[width=8.5cm]{images/bodeCrossoverFrequency.eps} 	
+		\end{column}		
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo}
+	\vspace*{5mm}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			\small Ubicando el cero del compensador una década por debajo de la frecuencia de cruce de ganancia $\omega_c'$ se obtiene $\omega_z = 0.056$ rad/s.\\
+			\vspace*{2mm}
+			\pause
+			Calculando la atenuación necesaria en $\omega_c'$ para garantizar el cruce por cero de la ganancia se tiene que:
+			\begin{align*}
+				&20 \log \left(\frac{1}{\beta}\right) = -17.51\\
+				& \Longrightarrow \beta = 7.5076
+			\end{align*}
+		\end{column}		
+		\begin{column}{0.6\textwidth}
+				\centering
+				\includegraphics[width=8.5cm]{images/bodeCrossoverFrequency.eps} 	
+		\end{column}		
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo}
+	\begin{columns}
+	\begin{column}{0.5\textwidth}
+		La ubicación del polo se obtiene como
+		\begin{equation*}
+			\omega_p = \frac{\omega_z}{\beta} = 0.0075
+		\end{equation*}
+		El parámetro $T$ se obtiene como:
+		\begin{equation*}
+			T = \frac{1}{\beta \omega_p} = 17.8571
+		\end{equation*}
+	\end{column}	
+	\begin{column}{0.5\textwidth}
+		Finalmente, se calcula $K_c$ como:
+		\begin{equation*}
+			K_c = \frac{K}{\beta} = 0.666
+		\end{equation*}
+		Entonces, el compensador obtenido es:
+		\begin{equation*}
+			G_c(s) = 5 \frac{1+17.8571s}{1+134.0639s}
+		\end{equation*}
+	\end{column}	
+	\end{columns}
+\end{frame}
+
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo - Diagrama de Bode}
+\begin{columns}
+	\begin{column}{0.35\textwidth}
+		\small
+		Los márgenes obtenidos para el sistema compensado son:\\
+		\vspace*{2mm}
+		\pause
+		\textcolor{red}{PM = \ang{40.1} en 0.562 rad/s.}\\
+		\vspace*{2mm}
+		\pause
+		\textcolor{green}{GM = 12.4 dB en 1.36 rad/s.}\\
+		\vspace*{2mm}
+		\pause
+		Se redujo el ancho de banda del sistema $\rightarrow$ filtro pasabajos.\\
+		\vspace*{2mm}
+		\pause
+		El compensador modifica la respuesta para bajas frecuencias.\\
+		\vspace*{2mm}
+		\pause
+		La atenuación en altas frecuencias mejora el margen de fase.
+	\end{column}
+	\begin{column}{0.65\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/bodeLagCompExampleComparison.eps}
+		\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo - Respuesta Paso Sistema Compensado}
+\begin{columns}
+	\begin{column}{0.3\textwidth}
+		\small
+		El sistema compensado en lazo cerrado presenta una respuesta más lenta $\Leftarrow$ menor ancho de banda.\\
+		\vspace*{2mm}
+		\pause
+		Polos de lazo cerrado: \scriptsize $\{-0.2776 \pm 0.6629j, -2.3919, -0.0604\}$.\\ 
+		\vspace*{2mm}
+		\pause
+		\small Polo dominante muy cercano al eje $j\omega$ $\Rightarrow$ cola de baja amplitud y lenta caída.
+	\end{column}
+	\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/stepRespLagCompExampleComparison.eps}
+		\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo - Respuesta Rampa Sistema Compensado}
+\vspace*{-2mm}
+\begin{columns}
+	\begin{column}{0.3\textwidth}
+		El sistema compensado en lazo cerrado presenta un mejor seguimiento de la referencia rampa.
+	\end{column}
+	\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/rampRespLagCompExampleComparison.eps}
+		\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\section{Compensación en Adelanto-Atraso Usando la Respuesta en Frecuencia}
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso}
+	\begin{equation*}
+		G_c(s) = K_c  \underbrace{\left(\frac{s+\frac{1}{T_1}}{s+\frac{\gamma}{T_1}}\right)}_{\text{Red de Adelanto}}  \underbrace{\left(\frac{s+\frac{1}{T_2}}{s+\frac{1}{\beta T_2}}\right)}_{\text{Red de Atraso}}, \hspace*{3mm} (\gamma > 1, \beta > 1)
+	\end{equation*}
+	\begin{itemize}
+		\item El compensador se forma por una red de adelanto en cascada con una red de atraso.
+		\item Ceros del compensador: $s = -1/T_1$, $s = -1/T_2$.
+		\item Polos del compensador: $s = -\gamma/T_1$, $s = -1/\beta T_2$.
+		\item Con frecuencia se toma $\gamma = \beta$ (no es necesario).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			Diagrama de Bode del compensador para $K_c = 1$, $\gamma = \beta = 10$, $T_2 = 10 T_1$.
+			\begin{itemize}
+				\item Frecuencia central (Fase igual a cero): $\omega_1 = \frac{1}{\sqrt{T_1 T_2}}$.
+				\item $0 < \omega < \omega_1$: Compensador de atraso.
+				\item $\omega_1 < \omega < \infty$: Compensador de adelanto.
+			\end{itemize}
+		\end{column}	
+		\begin{column}{0.6\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=8cm]{images/bodeLagLeadComp.eps}
+		\end{figure}
+		\end{column}	
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Procedimiento de Diseño}
+	\begin{enumerate}
+		\item Asumir la forma del compensador en adelanto - atraso como:
+		\begin{equation*}
+			G_c(s) = K_c \frac{\left(s+\frac{1}{T_1}\right)\left(s+\frac{1}{T_2}\right)}{\left(s+\frac{\beta}{T_1}\right)\left(s+\frac{1}{\beta T_2}\right)}, \hspace*{3mm} \beta > 1
+		\end{equation*}
+		\item Calcular el valor de $K_c$ necesario para satisfacer el requerimiento de la constante de error estático de velocidad.
+		\seti
+	\end{enumerate}		
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Procedimiento de Diseño}
+	\begin{enumerate}
+		\conti
+		\item Obtener el diagrama de bode del sistema no compensado con ganancia ajustada y determinar el márgen de fase. Si es insuficiente continuar con el procedimiento.
+		\item Seleccionar una frecuencia de cruce de ganancia deseada $\omega_c'$.
+		\item Ubicar la frecuencia de quiebre del cero de la red de atraso $\omega_{z2} = 1/T_2$ una década por debajo de la nueva frecuencia de cruce de ganancia $\omega_c'$.
+		\seti
+	\end{enumerate}		
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Procedimiento de Diseño}
+	\begin{enumerate}
+		\conti
+		\item Recordando la relación entre el ángulo de adelanto de fase $\phi_m$ y el parámetro $\alpha$:
+		\begin{equation*}
+			\sin \phi_m = \frac{1-\alpha}{1+\alpha}
+		\end{equation*}
+		se sustituye $\alpha = 1/\beta$ obteniendo:
+		\begin{equation*}
+			\sin \phi_m = \frac{\beta - 1}{\beta + 1}
+		\end{equation*}
+		A partir del requerimiento de márgen de fase, calcular el valor correspondiente de $\beta$.
+		\item Calcular la frecuencia de quiebre del polo de la red de atraso como $\omega_{p2} = 1/(\beta T_2)$.
+		\seti
+	\end{enumerate}		
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Procedimiento de Diseño}
+	\begin{enumerate}
+		\conti
+		\item Calcular la magnitud del sistema no compensado con ganancia ajustada en la frecuencia de cruce de ganancia deseada.
+		\item Asumiendo que el compensador introduce una atenuación del mismo valor, identificar la recta con pendiente 20 db/década que pasa por éste punto. Calcular las frecuencias de cruce con los niveles 0 db y -20 dB. Dichas frecuencias ($\omega_{z1}, \omega_{p1}$) corresponden a los puntos de quiebre (cero y polo) del compensador en adelanto.
+		\item Verificar si el sistema de control diseñado satisface los requerimientos. En caso contrario realizar nuevamente la ubicación de los polos y ceros hasta lograr un resultado satisfactorio.
+	\end{enumerate}		
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Ejemplo}
+	Considere el sistema cuya función de transferencia de lazo abierto es:
+	\begin{equation*}
+		G(s) = \frac{1}{s(s+1)(s+2)}
+	\end{equation*}
+	Se desea que el error estático de velocidad sea $10\ \text{seg}^{-1}$, el márgen de fase sea \ang{50}, y que el márgen de ganancia sea mayor o igual a 10 dB.
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Ejemplo}
+	% Se asume un compensador adelanto - atraso de la forma 
+	% \begin{equation*}
+	% 	G_c(s) = K_c \frac{\left(s+\frac{1}{T_1}\right)\left(s+\frac{1}{T_2}\right)}{\left(s+\frac{\beta}{T_1}\right)\left(s+\frac{1}{\beta T_2}\right)}, \hspace*{3mm} \beta > 1
+	% \end{equation*}
+	A partir del requerimiento dado por la constante de error estático de velocidad se tiene:
+	\begin{align*}
+		K_v = &\lim_{s \rightarrow 0} s G_c(s)G(s) = \lim_{s \rightarrow 0} s K_c \frac{(T_1 s + 1)(T_2 s + 1)}{(\frac{T_1}{\beta}s + 1)(\beta T_2 s + 1)} \frac{1}{s(s+1)(s+2)} = \frac{K_c}{2} = 10\\
+		& \Rightarrow K_c = 20
+	\end{align*}
+	Se obtiene el diagrama de Bode para el sistema no compensado con ganancia ajustada:
+			\begin{equation*}
+				G_1(s) = \frac{20}{s(s+1)(s+2)}
+			\end{equation*}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Ejemplo}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			Se obtienen los siguientes márgenes:\\
+			\vspace*{2mm}
+			\textcolor{red}{PM = -\ang{28.1} en 2.43 rad/s}\\
+			\vspace*{2mm}
+			\textcolor{green}{GM = -10.5 dB en 1.41 rad/s}\\
+			\vspace*{2mm}
+			El sistema $G_1(s)$ es inestable!
+		\end{column}
+		\begin{column}{0.6\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=8.5cm]{images/marginsExample2.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Ejemplo}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Para seleccionar $\omega_c'$ se utiliza la frecuencia donde la fase es igual a -\ang{180}:
+			\begin{equation*}
+				\omega_c' = 1.41 \text{ rad/s}
+			\end{equation*}
+			La frecuencia de quiebre correspondiente al cero de la red de atraso correponde a:
+			\begin{equation*}
+				\omega_{z2} = \omega_c'/10 = 0.141 \text{rad/s}
+			\end{equation*}
+			Por lo tanto $T_2 = 1/\omega_{z2} = 7.0922$.
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Dado que el margen de fase deseado es \ang{50}, se calcula el valor de $\beta$ como:
+			\begin{equation*}
+				\sin \phi_m = \frac{\beta-1}{\beta+1} \hspace*{2mm} \Rightarrow \hspace*{2mm} \beta = 7.5486
+			\end{equation*}
+			Entonces, la frecuencia de quiebre correspondiente al polo de la red de atraso es:
+			\begin{equation*}
+				\omega_{p2} = \frac{1}{\beta T_2} = 0.0187 \text{ rad/s}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Ejemplo}
+	Para obtener los parámetros de la red de adelanto, se observa en el diagrama de Bode que la magnitud del sistema $G_1(s)$ en la frecuencia $\omega_c'$ es igual a 10.5 dB.\\
+	\vspace*{2mm}
+	Por lo tanto el compensador debe generar una atenuación igual a -10.5 dB en esa misma frecuencia para garantizar el cruce por cero.\\
+	\vspace*{2mm}
+	Entonces, la curva de magnitud puede aproximarse a una recta con pendiente igual a 20 dB/década que pasa por el punto ($\omega_c',|G_1(j\omega_c')|$) = (1.41,-10.5).\\
+	\vspace*{2mm}
+	Para calcular las frecuencias de quiebre de la red de adelanto, se calculan los puntos de corte de la recta mencionada con los niveles 0 dB y -20 dB.
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Ejemplo}
+	Para calcular el punto de corte de la recta con el nivel 0 dB, se escribe la pendiente como:
+	\begin{align*}
+		20 &= \frac{0 \text{ dB} - (-10.5 \text{dB})}{\log_{10}\omega_{p1} - \log_{10}1.41 \text{ rad/s}}\\
+		& \Rightarrow \omega_{p1} = 4.7 \text{ rad/s}
+	\end{align*}
+	Para calcular el punto de corte de la recta con el nivel -20 dB, se escribe la pendiente como:
+	\begin{align*}
+		20 &= \frac{-10.5 \text{dB} - (-20 \text{ dB})}{\log_{10}1.41 \text{ rad/s} - \log_{10}\omega_{z1} }\\
+		& \Rightarrow \omega_{z1} = 0.47 \text{ rad/s}
+	\end{align*}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso: Ejemplo}
+	Por lo tanto, el compensador obtenido es:
+	\begin{align*}
+		G_c(s) &= K_c \frac{\left(s+\frac{1}{T_1}\right)\left(s+\frac{1}{T_2}\right)}{\left(s+\frac{\beta}{T_1}\right)\left(s+\frac{1}{\beta T_2}\right)}\\
+		 &= 20 \frac{(s+0.47)(s+0.141)}{(s+4.7)(s+0.0187)}
+	\end{align*}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo - Diagrama de Bode}
+\begin{columns}
+	\begin{column}{0.35\textwidth}
+		\small
+		Los márgenes obtenidos para el sistema compensado son:\\
+		\vspace*{2mm}
+		\pause
+		\textcolor{red}{PM = \ang{49.3} en 1.43 rad/s.}\\
+		\vspace*{2mm}
+		\pause
+		\textcolor{green}{GM = 12.4 dB en 3.46 rad/s.}\\
+		\vspace*{2mm}
+		\pause
+		Se satisfacen los márgenes especificados en los requerimientos!
+	\end{column}
+	\begin{column}{0.65\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/lagLeadExample2Comparison.eps}
+		\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo - Respuesta Paso Sistema Compensado}
+\begin{columns}
+	\begin{column}{0.3\textwidth}
+		\small
+		El sistema compensado en lazo cerrado presenta un tiempo de respuesta más rápido, con un sobrepico ligeramente mayor.\\
+		\vspace*{2mm}
+		\pause
+		Polos de lazo cerrado: \scriptsize \{$-5.7221$, $-0.3386$, $-0.1708$, $-0.7436 \pm 1.8576j$\}.\\ 
+		\vspace*{2mm}
+		\pause
+		\small Polo dominante muy cercano al eje $j\omega$ $\Rightarrow$ cola de baja amplitud y lenta caída.
+	\end{column}
+	\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/stepRespLagLeadCompExample2.eps}
+		\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo - Respuesta Rampa Sistema Compensado}
+\vspace*{-2mm}
+\begin{columns}
+	\begin{column}{0.3\textwidth}
+		El sistema compensado en lazo cerrado presenta un mejor seguimiento de la referencia rampa.
+	\end{column}
+	\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/rampRespLagLeadCompExample2.eps}
+		\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Conclusiones}
+\begin{itemize}
+	\item Compensación en adelanto: usada para mejorar los márgenes de estabilidad. Se logra gracias a la contribución de ángulo de fase en adelanto.
+	\item Compensación en atraso: usada para mejorar el desempeño de estado estacionario. Se logra debido a su atenuación en altas frecuencias.
+	\item Es posible que en algunos casos tanto el compensador en adelanto como el de atraso satisfagan los requerimientos.
+	\item Con la compensación en adelanto se puede lograr una frecuencia de cruce de ganancia mayor que la que es posible con la compensación en atraso.
+	\item El ancho de banda de un sistema con compensación en adelanto siempre es mayor que el de un sistema con compensación en atraso.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Conclusiones}
+\begin{itemize}
+	\item Si se requiere gran ancho de banda o respuesta rápida $\Rightarrow$ utilizar un compensador en adelanto.
+	\item Si hay presencia de ruido un gran ancho de banda no es deseable $\Rightarrow$ utilizar un compensador en atraso.
+	\item La compensación en adelanto puede generar señales grandes $\rightarrow$ no es deseable, puede haber saturación.
+	\item Compensación en atraso $\rightarrow$ introduce un polo-cero cerca al origen lo cual genera una cola lenta de baja amplitud en la respuesta de tiempo.
+	\item Compensador adelanto-atraso $\rightarrow$ permite incrementar la ganancia en baja frecuencia (mejora el desempeño de estado estacionario) a la vez que se aumenta el ancho de banda o los márgenes de estabilidad. 
+\end{itemize}
+\end{frame}
+
+\end{document}
