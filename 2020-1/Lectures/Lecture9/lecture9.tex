@@ -127,6 +127,11 @@ test/.default={3pt}}
 
 \frame{\titlepage}	
 
+\begin{frame}[<+->]\frametitle{Agenda}
+	\vspace{5mm}
+	\tableofcontents
+\end{frame}
+
 \begin{frame}[<+->]\frametitle{Compensadores - Características de los Diferentes Esquemas de Compensación}
  	\begin{itemize}
  		\item Compensación en adelanto:
@@ -151,6 +156,7 @@ test/.default={3pt}}
 \end{frame}
 
 \section{Compensación en Atraso Usando la Respuesta en Frecuencia}
+\subsection{Compensador en Atraso}
 \begin{frame}[<+->]\frametitle{Compensador en Atraso}
 	\begin{equation*}
 		G_c(s) = K_c \beta \frac{T s + 1}{\beta T s + 1} = K_c \frac{s+\frac{1}{T}}{s + \frac{1}{\beta T}}\hspace*{6mm} (\beta > 1)
@@ -167,13 +173,15 @@ test/.default={3pt}}
 \begin{columns}
 	\begin{column}{0.4\textwidth}
 	\small
-	Diagrama de Bode del compensador para $K_c=1$, $\beta=10$.
-	\begin{itemize}
-		\item<2-> Frecuencias de quiebre: $\omega = 1/T$, $\omega = 1/(\beta T)$.
-		\item<3-> Frecuencias bajas: $|G_c(s)| = 20$ dB.
-		\item<4-> Frecuencias altas: $|G_c(s)| = 0$ dB.
-		\item<5-> Compensador en atraso $\Leftrightarrow$ Filtro pasabajos.
-	\end{itemize}
+	Diagrama de Bode del compensador para $K_c=1$, $\beta=10$.\\
+	\vspace{2mm}
+	\onslide<2->{Frecuencias de quiebre: $\omega = 1/T$, $\omega = 1/(\beta T)$.\\}
+	\vspace{2mm}
+	\onslide<3->{Frecuencias bajas: $|G_c(s)| = 20$ dB.\\}
+	\vspace{2mm}
+	\onslide<4->{Frecuencias altas: $|G_c(s)| = 0$ dB.\\}
+	\vspace{2mm}
+	\onslide<5->{Compensador en atraso $\Leftrightarrow$ Filtro pasabajos.}
 	\end{column}
 	\begin{column}{0.6\textwidth}
 	\begin{figure}
@@ -207,6 +215,7 @@ test/.default={3pt}}
 	\end{enumerate}
 \end{frame}
 
+\subsection{Procedimiento de Diseño}
 \begin{frame}[<+->]\frametitle{Compensador en Atraso: Procedimiento de Diseño}
 	\begin{enumerate}
 		\conti
@@ -228,6 +237,7 @@ test/.default={3pt}}
 	\end{enumerate}
 \end{frame}
 
+\subsection{Ejemplo}
 \begin{frame}[<+->]\frametitle{Compensador en Atraso: Ejemplo}
 	Considere el sistema $G(s) = \frac{1}{s(s+1)(0.5s+1)}$ con retroalimentación unitaria:
 	\begin{figure}
@@ -307,6 +317,7 @@ test/.default={3pt}}
 \end{frame}
 
 \begin{frame}[c]\frametitle{Compensador en Atraso: Ejemplo}
+	\vspace{3mm}
 	\begin{columns}
 	\begin{column}{0.5\textwidth}
 		\onslide<1->{La ubicación del polo se obtiene como
@@ -393,6 +404,7 @@ test/.default={3pt}}
 \end{frame}
 
 \section{Compensación en Adelanto-Atraso Usando la Respuesta en Frecuencia}
+\subsection{Compensador en Atraso-Adelanto}
 \begin{frame}[<+->]\frametitle{Compensador en Adelanto - Atraso}
 	\begin{equation*}
 		G_c(s) = K_c  \underbrace{\left(\frac{s+\frac{1}{T_1}}{s+\frac{\gamma}{T_1}}\right)}_{\text{Red de Adelanto}}  \underbrace{\left(\frac{s+\frac{1}{T_2}}{s+\frac{1}{\beta T_2}}\right)}_{\text{Red de Atraso}}, \hspace*{3mm} (\gamma > 1, \beta > 1)
@@ -426,6 +438,7 @@ test/.default={3pt}}
 	\end{columns}
 \end{frame}
 
+\subsection{Procedimiento de Diseño}
 \begin{frame}[c]\frametitle{Compensador en Adelanto - Atraso: Procedimiento de Diseño}
 	\begin{enumerate}
 		\item<2-> Asumir la forma del compensador en adelanto - atraso como:
@@ -473,6 +486,7 @@ test/.default={3pt}}
 	\end{enumerate}		
 \end{frame}
 
+\subsection{Ejemplo}
 \begin{frame}[c]\frametitle{Compensador en Adelanto - Atraso: Ejemplo}
 	Considere el sistema cuya función de transferencia de lazo abierto es:
 	\begin{equation*}
@@ -630,6 +644,7 @@ test/.default={3pt}}
 \end{columns}
 \end{frame}
 
+\section{Conclusiones}
 \begin{frame}[<+->]\frametitle{Conclusiones}
 \begin{itemize}
 	\item Compensación en adelanto: usada para mejorar los márgenes de estabilidad. Se logra gracias a la contribución de ángulo de fase en adelanto.
